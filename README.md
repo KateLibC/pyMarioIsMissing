@@ -54,10 +54,10 @@ Manipulation of the PRNG can be found at `0x80836C` but work is still being sort
 Replication of the code can be found in `mimloader.py` and you can also import it by using the following:
 
 `
-> from mimloader import machineEmulator
-> me = machineEmulator()
-> me.prngPowerOn()
-> me.prngItemAssignment()
+from mimloader import machineEmulator
+me = machineEmulator()
+me.prngPowerOn()
+me.prngItemAssignment()
 `
 
 It will otherwise run if you execute `python3 mimloader.py`.
@@ -71,11 +71,11 @@ With three dungeons and five cities per dungeon, you're looking at 154 different
 You can check this for yourself and then tell me I am wrong if you figure out otherwise (`c2` and `c3` were left unused since it wasn't necessary to reference them):
 
 `
->>> from itertools import permutations
->>> c1 = 'sf moscow nairobi rome beijing'.split()
->>> c2 = 'paris mexico sydney argentina athens'.split()
->>> c3 = 'cairo tokyo rio london nyc'.split()
->>> len(list(permutations(c1)) + list(permutations(c1[1:])) + list(permutations(c1[2:]))+ list(permutations(c1[3:])) + list(permutations(c1[4:])) + list(permutations(c1[5:]))) * 3
+from itertools import permutations
+c1 = 'sf moscow nairobi rome beijing'.split()
+c2 = 'paris mexico sydney argentina athens'.split()
+c3 = 'cairo tokyo rio london nyc'.split()
+len(list(permutations(c1)) + list(permutations(c1[1:])) + list(permutations(c1[2:]))+ list(permutations(c1[3:])) + list(permutations(c1[4:])) + list(permutations(c1[5:]))) * 3
 `
 
 This doesn't take into account that it is possible that some cities may have a shared NPC value but since this project is still in its infancy, this will be the logic we have moving forward and there is one other factor that has yet to come up that we need to take into consideration.
