@@ -18,13 +18,13 @@ Anyway, the goal is to collect these items, tell Yoshi where the heck you are, a
 
 ## PRNG
 
-The game is separated into three dungeons with gates that lead into five different cities. Upon completion of all five cities, you face off against a dungeon boss. This repeats until you've defeated the three bosses and you end with a cut scene where Bowser falls into a hole.
+The game is separated into three dungeons each with gates that lead into five different cities. Upon completion of all five cities, you face off against a dungeon boss. This repeats until you've defeated the three bosses and you end with a cut scene where Bowser falls into a hole.
 
 Dungeon order is set but city is not and you can choose from any of five. However, item placement is dictated by door order so if you choose to go to San Francisco second instead of first, the Koopas with the required items will not be in the same place if you chose San Francisco first.
 
 The PRNG is still being worked out fully, but the number of NPC sprites per level (likely all Koopas and possibly the four human NPCs) dictates the PRNG value and thus which Koopas will have the items. This means that it doesn't matter if San Francisco is third and you play other cities before, the sprites will not stay consistent if you change the city order preceding.
 
-The good news here is that if you play Moscow and Nairobi first, this means that the items in Nairobi will always ben the same as will San Franscisco, Rome, and Beijing, but of course depending on what order you choose. A consistent order is a going to have a set order.
+The good news here is that if you play Moscow and Nairobi first, this means that the items in Nairobi will always be the same as will San Franscisco, Rome, and Beijing, but of course depending on what order you choose. A consistent order is a going to have a set sprite and item placement no matter what.
 
 ### Technical details
 
