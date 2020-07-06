@@ -60,7 +60,7 @@ me.prngPowerOn()
 me.prngItemAssignment()
 ```
 
-It will otherwise run if you execute `python3 mimloader.py`.
+It will otherwise run if you execute `python3 mimloader.py`. You will need to make sure that your ROM is in SMC format with the filename `mim.smc` to execute. I imagine it will work if it ends in SFC however. To my knowledge there is only one retail release for this game at least for NTSC regions so it should just work with any copy you have.
 
 More on how to use this will be documented as we progress.
 
