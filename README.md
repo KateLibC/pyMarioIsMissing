@@ -106,4 +106,4 @@ This should be considered an incomplete project and will not help any current sp
 
 ## Contact
 
-If you have any questions, feel free to reach out to be on Twitter at [@KateLibC](https://twitter.com/katelibc).
+If you have any questions, feel free to reach out to be on Twitter at [@KateLibC](https://twitter.com/katelibc) or on [Twitch](https://twitch.tv/katelibc). There are some videos in my collection that have me working through this and making a mess of things.
