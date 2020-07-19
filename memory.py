@@ -67,21 +67,29 @@ class LoROMMemoryMapper(object):
     # 0x00:0000 - 3F:FFFF read ROM and system stuff
     # TODO: the doc on the internet is very inconsistent about the memory ranges
     def read_system(self, bank, offset):
-        if offset <= 0x1FFF:
+        if offset <= 0x41FF:
+            if offset >= 0x2000 and offset <= 0x2FFF:
+                print(f'** Likely referencing PPU or APU--ignore read {hex(offset)}')
+            elif offset >= 0x3000 and offset <= 0x3FFF:
+                print(f'** Likely referencing DSP or external co-processor--ignore read {hex(offset)}')
+            elif offset >= 0x4000 and offset <= 0x41FF:
+                print(f'** Likely referencing user inputs--ignore read {hex(offset)}')
             return self.RAM[offset]
-        elif offset>= 0x2000 and offset <= 0x2FFF: # maybe 21FF is correct
-            # TODO: PPU, APU, Hardware Registers
-            # 0x2100 - 0x213F PPU (or PPU2 ?)
-            # 0x2180 - 0x2183 (insde RAM?)
-            # raise NotImplementedError()
-            return self.ppu.read(offset)
-        elif offset >= 0x3000 and offset <= 0x3FFF:
-            # TODO: Super-FX, DSP
-            raise NotImplementedError()
-        elif offset >= 0x4000 and offset <= 0x41FF: # maybe 40FF is correct
-            # TODO: Joypad Registers / Controller
-            # 0x4016 - 0x4017 CPU
-            raise NotImplementedError()
+            '''if offset <= 0x1FFF:
+                return self.RAM[offset]
+            elif offset>= 0x2000 and offset <= 0x2FFF: # maybe 21FF is correct
+                # TODO: PPU, APU, Hardware Registers
+                # 0x2100 - 0x213F PPU (or PPU2 ?)
+                # 0x2180 - 0x2183 (insde RAM?)
+                # raise NotImplementedError()
+                return self.ppu.read(offset)
+            elif offset >= 0x3000 and offset <= 0x3FFF:
+                # TODO: Super-FX, DSP
+                raise NotImplementedError()
+            elif offset >= 0x4000 and offset <= 0x41FF: # maybe 40FF is correct
+                # TODO: Joypad Registers / Controller
+                # 0x4016 - 0x4017 CPU
+                raise NotImplementedError()'''
         elif offset >= 0x4200 and offset <= 0x5FFF: # maybe 44FF is correct
             # TODO: DMA, PPU2, Hardware Registers
             # 0x4200 - 0x420D CPU
