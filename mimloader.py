@@ -76,7 +76,7 @@ class machineEmulator(object):
         self.prngShowValues(function='poweron_post')
 
     def prngLevelLoad(self):
-        # To be implemented          # .81:E920 JSR     funcLevelLoadObjects?
+        self.prngLoadObjects()       # .81:E920 JSR     funcLevelLoadObjects?
         self.a = 0x0                 # .81:E923 LDA     #0
         memory.write(0x06A7, self.a) # .81:E926 STA     word_7E06A7 ; orig=0x06A7
         self.a = 0x40                # .81:E929 LDA     #$40 ; '@'
@@ -187,10 +187,37 @@ class machineEmulator(object):
         # Likely we can ignore this due to input func  # .81:EA24 JSL     sub_80828C
 
     def prngLevelLoadA(self):
-        # .81:FF03 LDA     word_7E06DB ; orig=0x06DB
-        # .81:FF06 CMP     word_7E06A3 ; orig=0x06A3
-        # .81:FF09 BNE     loc_81FF0C
-        pass
+        self.a = memory.read(0x06DB)                   # .81:FF03 LDA     word_7E06DB ; orig=0x06DB
+        if self.a is not memory.read(0x06A3):          # .81:FF06 CMP     word_7E06A3 ; orig=0x06A3
+            # Buffer                                   # .81:FF09 BNE     loc_81FF0C
+            # Buffer                                   # .81:FF0C loc_81FF0C:                             ; CODE XREF: sub_81FF03+6↑j
+            memory.write(0x06A3, self.a)               # .81:FF0C STA     word_7E06A3 ; orig=0x06A3
+            self.a = self.a << 1                       # .81:FF0F ASL
+            self.a = self.a << 1                       # .81:FF10 ASL
+            self.y = self.a                            # .81:FF11 TAY
+            self.a = memory.read(0x81FF4D + self.y)    # .81:FF12 LDA     word_81FF4D, Y
+            memory.write(0x005D, self.a)               # .81:FF15 STA     D, word_7E005D
+            self.a = memory.read(0x81FF4F + self.y)    # .81:FF17 LDA     word_81FF4F, Y
+            memory.write(0x005F, self.a)               # .81:FF1A STA     D, word_7E005F
+            self.a = 0x0800                            # .81:FF1C LDA     #$800
+            self.prngLevelLoadC()                      # .81:FF1F JSL     sub_808781
+            self.a = memory.read(0x06A3)               # .81:FF23 LDA     word_7E06A3 ; orig=0x06A3
+            if self.a is not memory.read(0x06A3):      # .81:FF26 BNE     loc_81FF32
+                self.a = 0x5B                          # .81:FF28 LDA     #$5B ; '['
+                self.prngLevelLoadD()                  # .81:FF2B JSR     sub_81ECF1
+                self.a += 1                            # .81:FF2E INC
+                self.prngLevelLoadD()                  # .81:FF2F JSR     sub_81ECF1
+        else:                                          # .81:FF32 loc_81FF32:                             ; CODE XREF: sub_81FF03+23↑j
+            self.a = memory.read(0x6DB)                # .81:FF32 LDA     word_7E06DB ; orig=0x06DB
+            self.a = self.a << 1                       # .81:FF35 ASL
+            self.y = self.a                            # .81:FF36 TAY
+            self.a = memory.read(0x81FF55)             # .81:FF37 LDA     word_81FF55, Y
+            memory.write(0x0E4B, self.a)               # .81:FF3A STA     word_7E0E4B ; orig=0x0E4B
+            self.a = memory.read(0x81FF59, self.y)     # .81:FF3D LDA     word_81FF59, Y
+            memory.write(0x0E57, self.a)               # .81:FF40 STA     word_7E0E57 ; orig=0x0E57
+            self.a = memory.read(0x0855)               # .81:FF43 LDA     word_7E0855 ; orig=0x0855
+            self.a = self.a & 0xFFFE                   # .81:FF46 AND     #$FFFE
+            memory.write(0x0855, self.a)               # .81:FF49 STA     word_7E0855 ; orig=0x0855
 
     def prngLevelLoadB(self):
         # .80:9F8D PHP
@@ -200,14 +227,14 @@ class machineEmulator(object):
         # .80:9F91 ; ds=80000 B=80
         # .80:9F91 REP     #$30 ; '0'
         # .80:9F93 STA     word_7E0E5F ; orig=0x0E5F
-        # .80:9F96 ASL
-        # .80:9F97 ASL
-        # .80:9F98 ASL
-        # .80:9F99 ASL
+        self.a = self.a << 1                       # .80:9F96 ASL
+        self.a = self.a << 1                       # .80:9F97 ASL
+        self.a = self.a << 1                       # .80:9F98 ASL
+        self.a = self.a << 1                       # .80:9F99 ASL
         # .80:9F9A STA     word_7E0F39 ; orig=0x0F39
         # .80:9F9D STA     word_7E0F2D ; orig=0x0F2D
         # .80:9FA0 TYA
-        # .80:9FA1 ASL
+        self.a = self.a << 1                       # .80:9FA1 ASL
         # .80:9FA2 TAY
         # .80:9FA3 LDX     #$1A
         # .80:9FA6 LDA     word_7E3000, X
@@ -222,10 +249,10 @@ class machineEmulator(object):
         # .80:9FBE STA     D, word_7E005D
         # .80:9FC0 LDA     [D, word_7E005D], Y
         # .80:9FC2 STA     word_7E0F3D ; orig=0x0F3D
-        # .80:9FC5 ASL
-        # .80:9FC6 ASL
-        # .80:9FC7 ASL
-        # .80:9FC8 ASL
+        self.a = self.a << 1                       # .80:9FC5 ASL
+        self.a = self.a << 1                       # .80:9FC6 ASL
+        self.a = self.a << 1                       # .80:9FC7 ASL
+        self.a = self.a << 1                       # .80:9FC8 ASL
         # .80:9FC9 STA     word_7E0F41 ; orig=0x0F41
         # .80:9FCC SEC
         # .80:9FCD LDA     word_7E0F3D ; orig=0x0F3D
@@ -246,7 +273,7 @@ class machineEmulator(object):
         # .80:9FF1 STA     word_7E0F29 ; orig=0x0F29
         # .80:9FF4 PLA
         # .80:9FF5 PHX
-        # .80:9FF6 JSR     sub_80A0C5
+        self.prngLevelLoadE() # .80:9FF6 JSR     sub_80A0C5
         # .80:9FF9 INC     word_7E0E63 ; orig=0x0E63
         # .80:9FFC PLX
         # .80:9FFD DEX
@@ -268,7 +295,7 @@ class machineEmulator(object):
         # .80:A019 STA     word_7E0F2B ; orig=0x0F2B
         # .80:A01C PLA
         # .80:A01D PHX
-        # .80:A01E JSR     sub_80A0C5
+        self.prngLevelLoadE() # .80:A01E JSR     sub_80A0C5
         # .80:A021 DEC     word_7E0E61 ; orig=0x0E61
         # .80:A024 PLX
         # .80:A025 DEX
@@ -302,15 +329,136 @@ class machineEmulator(object):
         # .80:A054
         # .80:A054 loc_80A054:                             ; CODE XREF: sub_809F8D+B1↑j
         # .80:A054                                         ; sub_809F8D+BE↑j
-        # .80:A054 ASL
-        # .80:A055 ASL
-        # .80:A056 ASL
-        # .80:A057 ASL
+        self.a = self.a << 1                       # .80:A054 ASL
+        self.a = self.a << 1                       # .80:A055 ASL
+        self.a = self.a << 1                       # .80:A056 ASL
+        self.a = self.a << 1                       # .80:A057 ASL
         # .80:A058 STA     D, word_7E004D
         # .80:A05A STZ     word_7E0F37 ; orig=0x0F37
         # .80:A05D STZ     D, word_7E0051
         # .80:A05F PLB
         # .80:A060 PLP
+        pass
+
+    def prngLevelLoadC(self):
+        # .80:8781    PHP
+        # .80:8782    REP     #$20 ; ' '
+        # .80:8784    SEP     #$10
+        # .80:8786 .I8
+        # .80:8786    STA     D, word_7E002A
+        # .80:8788    LDA     [D, word_7E005D]
+        # .80:878A    STA     D, word_7E002C
+        # .80:878C    LDX     #0
+        # .80:878E    STX     D, byte_7E002E
+        # .80:8790    LDA     #$8000
+        # .80:8793    STA     D, word_7E002F
+        # .80:8795    LDX     #$7F
+        # .80:8797    STX     D, word_7E0031
+        # .80:8799    INC     D, word_7E005D
+        # .80:879B    INC     D, word_7E005D
+        # .80:879D    JSL     sub_808BB7
+        # .80:87A1    LDA     #$2A ; '*'
+        # .80:87A4    STA     D, word_7E0018
+        # .80:87A6    LDX     #0
+        # .80:87A8    STX     D, word_7E001A
+        self.prngSpriteWorker() # .80:87AA    JSL     sub_808506
+        # .80:87AE    PLP
+        pass
+
+    def prngLevelLoadD(self):
+        # .81:ECF1 PHA
+        # .81:ECF2 STA     word_7E05DB ; orig=0x05DB
+        # .81:ECF5 AND     #7
+        self.a = self.a << 1                       # .81:ECF8 ASL
+        # .81:ECF9 TAY
+        # .81:ECFA LDA     word_7E05DB ; orig=0x05DB
+        # .81:ECFD LSR
+        # .81:ECFE LSR
+        # .81:ECFF AND     #$FE
+        # .81:ED02 TAX
+        # .81:ED03 LDA     byte_7E0400, X
+        # .81:ED06 ORA     word_8180E4, Y
+        # .81:ED09 STA     byte_7E0400, X
+        # .81:ED0C LDA     word_7E05DB ; orig=0x05DB
+        self.a = self.a << 1                       # .81:ED0F ASL
+        self.a = self.a << 1                       # .81:ED10 ASL
+        # .81:ED11 TAY
+        # .81:ED12 LDA     #$80
+        # .81:ED15 STA     word_7E0200, Y
+        # .81:ED18 PLA
+        # .81:ED19 RTS
+        pass
+
+    def prngLevelLoadE(self):
+        # .80:A0C5 CMP     word_7E0F3D ; orig=0x0F3D
+        # .80:A0C8 BCC     loc_80A0D6
+        # .80:A0CA LDX     #$7E ; '~'
+        # .80:A0CD loc_80A0CD:                             ; CODE XREF: sub_80A0C5+D↓j
+        # .80:A0CD STZ     unk_7E0EA5, X
+        # .80:A0D0 DEX
+        # .80:A0D1 DEX
+        # .80:A0D2 BPL     loc_80A0CD
+        # .80:A0D4 BRA     loc_80A106
+        # .80:A0D6 loc_80A0D6:                             ; CODE XREF: sub_80A0C5+3↑j
+        # .80:A0D6 ASL
+        # .80:A0D7 PHA
+        self.a = self.a << 1                       # .80:A0D8 ASL
+        # .80:A0D9 PHA
+        # .80:A0DA ASL
+        # .80:A0DB STA     word_7E0F27 ; orig=0x0F27
+        # .80:A0DE CLC
+        # .80:A0DF PLA
+        # .80:A0E0 ADC     word_7E0F27 ; orig=0x0F27
+        # .80:A0E3 STA     word_7E0F27 ; orig=0x0F27
+        # .80:A0E6 CLC
+        # .80:A0E7 PLA
+        # .80:A0E8 ADC     word_7E0F27 ; orig=0x0F27
+        self.a = self.a << 1                       # .80:A0EB ASL
+        # .80:A0EC STA     word_7E0F27 ; orig=0x0F27
+        # .80:A0EF STZ     word_7E0F25 ; orig=0x0F25
+        # .80:A0F2 LDX     #$E
+        # .80:A0F5 LDY     word_7E0F27 ; orig=0x0F27
+        # .80:A0F8 loc_80A0F8:                             ; CODE XREF: sub_80A0C5+3F↓j
+        # .80:A0F8 LDA     [D, word_7E006D], Y
+        # .80:A0FA PHX
+        # .80:A0FB PHY
+        # .80:A0FC JSR     sub_80A149
+        # .80:A0FF PLY
+        # .80:A100 INY
+        # .80:A101 INY
+        # .80:A102 PLX
+        # .80:A103 DEX
+        # .80:A104 BNE     loc_80A0F8
+        # .80:A106 loc_80A106:                             ; CODE XREF: sub_80A0C5+F↑j
+        # .80:A106 LDX     word_7E0F31 ; orig=0x0F31
+        # .80:A109 LDA     word_7E0F29, X
+        self.a = self.a << 1                       # .80:A10C ASL
+        # .80:A10D TAX
+        # .80:A10E LDA     word_80A177, X
+        # .80:A111 STA     D, word_7E002A
+        # .80:A113 LDA     #$40 ; '@'
+        # .80:A116 STA     D, word_7E002C
+        # .80:A118 SEP     #$20 ; ' '
+        # .80:A11A LDA     #$80
+        # .80:A11C STA     D, byte_7E002E
+        # .80:A11E LDX     #$EA5
+        # .80:A121 STX     D, word_7E002F
+        # .80:A123 STZ     D, word_7E0031
+        # .80:A125 LDX     #$2A ; '*'
+        # .80:A128 STX     D, word_7E0018
+        # .80:A12A LDA     #0
+        # .80:A12C STA     D, word_7E001A
+        self.prngSpriteWorker() # .80:A12E JSL     sub_808506
+        # .80:A132 INC     D, word_7E002A
+        # .80:A134 LDX     #$EE5
+        # .80:A137 STX     D, word_7E002F
+        # .80:A139 LDX     #$2A ; '*'
+        # .80:A13C STX     D, word_7E0018
+        # .80:A13E LDA     #0
+        # .80:A140 STA     D, word_7E001A
+        self.prngSpriteWorker() # .80:A142 JSL     sub_808506
+        # .80:A146 REP     #$20 ; ' '
+        # .80:A148 RTS
         pass
 
     # This appears to load the sprites/items into game memory and works with the PRNG
@@ -582,6 +730,135 @@ class machineEmulator(object):
         memory.write(0x0BF7 + self.x, self.a)   # .81:EC85 STA     word_7E08F7, X
         self.a = 0x7E                           # .81:EC88 LDA     #$7E ; '~'
         memory.write(0x00DD, self.a)            # .81:EC8B STA     D, word_7E00DD
+
+    def prngSpriteWorker(self):
+        # .80:8506 sub_808506:                             ; CODE XREF: sub_808453+E↑P
+        # .80:8506                                         ; sub_808471+E↑P ...
+        # .80:8506                 PHP
+        # .80:8507                 PHB
+        # .80:8508                 PHK
+        # .80:8509                 PLB
+        # .80:850A ; ds=80000 B=80
+        # .80:850A                 SEP     #$30 ; '0'
+        # .80:850C .I8
+        # .80:850C                 LDA     D, word_7E0000
+        # .80:850E                 BMI     loc_80857C
+        # .80:8510                 LDY     #4
+        # .80:8512                 LDA     [D, word_7E0018], Y
+        # .80:8514                 BPL     loc_808523
+        # .80:8516                 AND     #$7F
+        # .80:8518                 TAY
+        # .80:8519                 LDA     byte_808681, Y
+        # .80:851C                 ORA     #1
+        # .80:851E                 STA     VMAIN ; orig=0x2115 ; VRAM Address Increment Mode
+        # .80:8521                 BRA     loc_80852A
+        # .80:8523 ; ---------------------------------------------------------------------------
+        # .80:8523
+        # .80:8523 loc_808523:                             ; CODE XREF: sub_808506+E↑j
+        # .80:8523                 TAY
+        # .80:8524                 LDA     byte_808681, Y
+        # .80:8527                 STA     VMAIN ; orig=0x2115 ; VRAM Address Increment Mode
+        # .80:852A
+        # .80:852A loc_80852A:                             ; CODE XREF: sub_808506+1B↑j
+        # .80:852A                 LDA     byte_808692, Y
+        # .80:852D                 STA     BBAD0 ; orig=0x4301 ; DMA/HDMA I/O-Bus Address (PPU-Bus aka B-Bus)
+        # .80:8530                 LDA     byte_8086A3, Y
+        # .80:8533                 STA     DMAP0 ; orig=0x4300 ; DMA/HDMA Parameters (ab0cdeee a = Direction b = Type c = Inc/Dec d = Auto/Fixed e = Word Size Select)
+        # .80:8536                 CPY     #$D
+        # .80:8538                 BCC     loc_808543
+        # .80:853A                 LDY     #0
+        # .80:853C                 LDA     [D, word_7E0018], Y
+        # .80:853E                 STA     CGADD ; orig=0x2121 ; Palette CGRAM Address
+        # .80:8541                 BRA     loc_808550
+        # .80:8543 ; ---------------------------------------------------------------------------
+        # .80:8543
+        # .80:8543 loc_808543:                             ; CODE XREF: sub_808506+32↑j
+        # .80:8543                 LDY     #0
+        # .80:8545                 LDA     [D, word_7E0018], Y
+        # .80:8547                 STA     VMADDL ; orig=0x2116 ; VRAM Address (lower 8bit)
+        # .80:854A                 INY
+        # .80:854B                 LDA     [D, word_7E0018], Y
+        # .80:854D                 STA     VMADDH ; orig=0x2117 ; VRAM Address (upper 8bit)
+        # .80:8550
+        # .80:8550 loc_808550:                             ; CODE XREF: sub_808506+3B↑j
+        # .80:8550                 LDY     #2
+        # .80:8552                 LDA     [D, word_7E0018], Y
+        # .80:8554                 STA     DAS0L ; orig=0x4305 ; Indirect HDMA Address (low)  / DMA Byte-Counter (low)
+        # .80:8557                 INY
+        # .80:8558                 LDA     [D, word_7E0018], Y
+        # .80:855A                 STA     DAS0H ; orig=0x4306 ; Indirect HDMA Address (high) / DMA Byte-Counter (high)
+        # .80:855D                 LDY     #5
+        # .80:855F                 LDA     [D, word_7E0018], Y
+        # .80:8561                 STA     A1T0L ; orig=0x4302 ; HDMA Table Start Address (low)  / DMA Curr Addr (low)
+        # .80:8564                 INY
+        # .80:8565                 LDA     [D, word_7E0018], Y
+        # .80:8567                 STA     A1T0H ; orig=0x4303 ; HDMA Table Start Address (high) / DMA Curr Addr (high)
+        # .80:856A                 INY
+        # .80:856B                 LDA     [D, word_7E0018], Y
+        # .80:856D                 STA     A1B0 ; orig=0x4304 ; HDMA Table Start Address (bank) / DMA Curr Addr (bank)
+        # .80:8570                 LDA     #1
+        # .80:8572                 STA     MDMAEN ; orig=0x420B ; Select General Purpose DMA Channel(s) and Start Transfer (abcdefgh a = Channel 7...h = Channel 0: 1 = Enable 0 = Disable
+        # .80:8575                 LDA     #$80
+        # .80:8577                 STA     VMAIN ; orig=0x2115 ; VRAM Address Increment Mode
+        # .80:857A                 BRA     loc_8085BC
+        # .80:857C ; ---------------------------------------------------------------------------
+        # .80:857C
+        # .80:857C loc_80857C:                             ; CODE XREF: sub_808506+8↑j
+        # .80:857C                 LDA     D, word_7E0014
+        # .80:857E                 CMP     #$17
+        # .80:8580                 BEQ     loc_80858B
+        # .80:8582                 INC
+        # .80:8583                 CMP     D, word_7E0014+1
+        # .80:8585                 BNE     loc_80858F
+        # .80:8587
+        # .80:8587 loc_808587:                             ; CODE XREF: sub_808506+87↓j
+        # .80:8587                 PLB
+        # .80:8588                 PLP
+        # .80:8589 .I16
+        # .80:8589                 SEC
+        # .80:858A                 RTL
+        # .80:858B ; ---------------------------------------------------------------------------
+        # .80:858B
+        # .80:858B loc_80858B:                             ; CODE XREF: sub_808506+7A↑j
+        # .80:858B                 LDA     D, word_7E0014+1
+        # .80:858D                 BEQ     loc_808587
+        # .80:858F
+        # .80:858F loc_80858F:                             ; CODE XREF: sub_808506+7F↑j
+        # .80:858F                 LDA     D, word_7E0014
+        # .80:8591                 ASL
+        # .80:8592                 ASL
+        # .80:8593                 ASL
+        # .80:8594                 TAX
+        # .80:8595                 REP     #$20 ; ' '
+        # .80:8597 .A16
+        # .80:8597                 LDY     #$B700
+        # .80:859A                 CLC
+        # .80:859B                 STA     unk_7E0420, X
+        # .80:859E                 INX
+        # .80:859F                 INX
+        # .80:85A0                 INY
+        # .80:85A1                 INY
+        # .80:85A2                 CPY     #$9008
+        # .80:85A5                 SBC     (S, $A0, Y)
+        # .80:85A7                 COP
+        # .80:85A9                 CLC
+        # .80:85AA                 PHA
+        # .80:85AB                 LDX     D, word_7E0014
+        # .80:85AD                 INX
+        # .80:85AE                 CPX     #$9018
+        # .80:85B1                 COP
+        # .80:85B3                 BRK
+        # .80:85B5                 PLA
+        # .80:85B6                 ADC     D, word_7E0016
+        # .80:85B8                 STA     D, word_7E0016
+        # .80:85BA                 STX     D, word_7E0014
+        # .80:85BC
+        # .80:85BC loc_8085BC:                             ; CODE XREF: sub_808506+74↑j
+        # .80:85BC                 PLB
+        # .80:85BD                 PLP
+        # .80:85BE .A8
+        # .80:85BE                 CLC
+        pass
 
 if __name__ == '__main__':
     me = machineEmulator()
